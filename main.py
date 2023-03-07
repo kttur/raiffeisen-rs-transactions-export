@@ -2,9 +2,9 @@ import os
 from datetime import date, timedelta
 
 from config import settings
-from raiffeisen_rs.api import RaiffeisenRsAPI
-from utils.csv import write_dict_to_csv
-from utils.email import SMTP
+from src.raiffeisen_rs.api import RaiffeisenRsAPI
+from src.utils.csv import write_dict_to_csv
+from src.utils.email import SMTP
 
 
 def main():

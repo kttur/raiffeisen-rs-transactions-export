@@ -1,7 +1,7 @@
 import requests
 from dataclasses import dataclass
 
-from raiffeisen_rs.utils import decode_response, parse_date
+from src.raiffeisen_rs.utils import decode_response, parse_date
 
 
 @dataclass
