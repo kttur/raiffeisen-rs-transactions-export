@@ -256,7 +256,7 @@ class RaiffeisenRsAPI:
             from_amount=None,
             to_amount=None,
             group_by_account=True,
-    ) -> list[Transaction | dict[dict, list[Transaction]]]:
+    ) -> list[Transaction | dict[str, dict | list[Transaction]]]:
         """
         Get transactions from all accounts.
         Args:
@@ -268,7 +268,7 @@ class RaiffeisenRsAPI:
             to_amount (float): Filter transactions by max amount. Default is None.
             group_by_account (bool): Group transactions by account. Default is True.
         Returns:
-            list[Transaction | dict[dict, list[Transaction]]]: List of transactions if group_by_account is False
+            list[Transaction | dict[str, dict | list[Transaction]]]: List of transactions if group_by_account is False
             or list of dicts with account data and transactions if group_by_account is True.
         """
 
