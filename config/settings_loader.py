@@ -17,6 +17,7 @@ class Settings:
     username: str
     password_hash: str
     max_transaction_age_days: int
+    min_transaction_age_days: int
     save_to_csv: bool
     csv_file_dir: str
     wallet_emails: dict[str, str]
@@ -31,6 +32,7 @@ def get_parser() -> ArgumentParser:
     parser.add_argument('-u', '--username', help="Raiffeisen RS username.")
     parser.add_argument('-p', '--password', help="Raiffeisen RS password hash.")
     parser.add_argument('-d', '--days', help="Max transaction age in days.")
+    parser.add_argument('-s', '--skip-days', help="Skip transactions younger than X days.")
     parser.add_argument('-c', '--csv', help="Save transactions to CSV file.", action="store_true")
     parser.add_argument('--path', help="CSV file directory.")
     parser.add_argument(
@@ -54,6 +56,7 @@ def load_settings() -> Settings:
     username = args.username or environ.get("USERNAME")
     password_hash = args.password or environ.get("PASSWORD_HASH")
     max_transaction_age_days = args.days or int(environ.get("MAX_TRANSACTION_AGE_DAYS", 1))
+    min_transaction_age_days = args.skip_days or int(environ.get("MIN_TRANSACTION_AGE_DAYS", 0))
     save_to_csv = args.csv or bool(environ.get("SAVE_TO_CSV", False))
     csv_file_dir = args.path or environ.get("CSV_FILE_DIR", ".")
     wallet_email_file = args.file or environ.get("WALLET_EMAIL_FILE")
@@ -115,6 +118,7 @@ def load_settings() -> Settings:
         username=username,
         password_hash=password_hash,
         max_transaction_age_days=max_transaction_age_days,
+        min_transaction_age_days=min_transaction_age_days,
         save_to_csv=save_to_csv,
         csv_file_dir=csv_file_dir,
         wallet_emails=emails,
