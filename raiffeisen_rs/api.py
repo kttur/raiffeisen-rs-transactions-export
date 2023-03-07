@@ -1,7 +1,7 @@
 import requests
 from dataclasses import dataclass
 
-from raiffeisen_rs.utils import decode_response
+from raiffeisen_rs.utils import decode_response, parse_date
 
 
 @dataclass
@@ -97,6 +97,7 @@ class TransactionFactory:
 
 class Account:
     """Account class."""
+
     def __init__(self, api_obj, number, currency, currency_code, product_core_id):
         self.api_obj = api_obj
         self.number = number
@@ -121,20 +122,26 @@ class Account:
             end_date=None,
             from_amount=None,
             to_amount=None,
-    ):
-        """Get account transactions"""
+    ) -> list[Transaction]:
+        """
+        Get account transactions.
+        Args:
+            start_date (str | int | datetime | date): Start date. Default is None. Supported format is %d.%m.%Y or ISO format.
+            end_date (str | int | datetime | date): End date. Default is None. Supported format is %d.%m.%Y or ISO format.
+            from_amount (float): Filter transactions by min amount. Default is None.
+            to_amount (float): Filter transactions by max amount. Default is None.
+        Returns:
+            list[Transaction]: List of transactions.
+        """
+
         self.api_obj.session.headers['Referer'] = 'https://rol.raiffeisenbank.rs/Retail/user/accounts'
         filters = {
             'CurrencyCodeNumeric': self.currency_code,
+            'FromDate': parse_date(start_date),
+            'ToDate': parse_date(end_date),
+            'FromAmount': from_amount,
+            'ToAmount': to_amount,
         }
-        if start_date:
-            filters['FromDate'] = start_date
-        if end_date:
-            filters['ToDate'] = end_date
-        if from_amount:
-            filters['FromAmount'] = from_amount
-        if to_amount:
-            filters['ToAmount'] = to_amount
 
         response = self.api_obj.session.post(
             'https://rol.raiffeisenbank.rs/Retail/Protected/Services/DataService.svc/GetTransactionalAccountTurnover',
@@ -181,6 +188,7 @@ class RaiffeisenRsAPI:
 
     def login(self):
         """Login to Raiffeisen.rs Online Banking."""
+
         self.session.headers['Referer'] = 'https://rol.raiffeisenbank.rs/Retail/Home/Login'
         response = self.session.post(
             'https://rol.raiffeisenbank.rs/Retail/Protected/Services/RetailLoginService.svc/LoginFont',
@@ -195,8 +203,13 @@ class RaiffeisenRsAPI:
         self.request_token = data['RequestToken']
         self.session.headers['X-Holos-RequestToken'] = self.request_token
 
-    def get_accounts(self):
-        """Get accounts."""
+    def get_accounts(self) -> list[dict]:
+        """
+        Get accounts from server.
+        Returns:
+            list[dict]: List of accounts.
+        """
+
         self.session.headers['Referer'] = 'https://rol.raiffeisenbank.rs/Retail/user/accounts'
         response = self.session.post(
             'https://rol.raiffeisenbank.rs/Retail/Protected/Services/DataService.svc/GetAllAccountBalance',
@@ -218,6 +231,10 @@ class RaiffeisenRsAPI:
         return accounts
 
     def update_accounts(self):
+        """
+        Update accounts from server.
+        """
+
         accounts = self.get_accounts()
         self.accounts = [
             Account(
@@ -237,8 +254,20 @@ class RaiffeisenRsAPI:
             from_amount=None,
             to_amount=None,
             group_by_account=True,
-    ):
-        """Get transactions."""
+    ) -> list[Transaction | dict[dict, list[Transaction]]]:
+        """
+        Get transactions from all accounts.
+        Args:
+            start_date (str | int | datetime | date): Start date. Default is None. Supported format is %d.%m.%Y or ISO format.
+            end_date (str | int | datetime | date): End date. Default is None. Supported format is %d.%m.%Y or ISO format.
+            from_amount (float): Filter transactions by min amount. Default is None.
+            to_amount (float): Filter transactions by max amount. Default is None.
+            group_by_account (bool): Group transactions by account. Default is True.
+        Returns:
+            list[Transaction | dict[dict, list[Transaction]]]: List of transactions if group_by_account is False
+            or list of dicts with account data and transactions if group_by_account is True.
+        """
+
         if not self.accounts:
             self.update_accounts()
 
