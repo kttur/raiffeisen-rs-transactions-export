@@ -126,8 +126,10 @@ class Account:
         """
         Get account transactions.
         Args:
-            start_date (str | int | datetime | date): Start date. Default is None. Supported format is %d.%m.%Y or ISO format.
-            end_date (str | int | datetime | date): End date. Default is None. Supported format is %d.%m.%Y or ISO format.
+            start_date (str | int | datetime | date): Start date. Default is None.
+                Supported format is %d.%m.%Y or ISO format.
+            end_date (str | int | datetime | date): End date. Default is None.
+                Supported format is %d.%m.%Y or ISO format.
             from_amount (float): Filter transactions by min amount. Default is None.
             to_amount (float): Filter transactions by max amount. Default is None.
         Returns:
@@ -258,8 +260,10 @@ class RaiffeisenRsAPI:
         """
         Get transactions from all accounts.
         Args:
-            start_date (str | int | datetime | date): Start date. Default is None. Supported format is %d.%m.%Y or ISO format.
-            end_date (str | int | datetime | date): End date. Default is None. Supported format is %d.%m.%Y or ISO format.
+            start_date (str | int | datetime | date): Start date. Default is None.
+                Supported format is %d.%m.%Y or ISO format.
+            end_date (str | int | datetime | date): End date. Default is None.
+                Supported format is %d.%m.%Y or ISO format.
             from_amount (float): Filter transactions by min amount. Default is None.
             to_amount (float): Filter transactions by max amount. Default is None.
             group_by_account (bool): Group transactions by account. Default is True.
