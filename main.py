@@ -26,7 +26,7 @@ def main():
         smtp = None
 
     start_date = date.today() - timedelta(days=settings.max_transaction_age_days)
-    end_date = date.today()
+    end_date = date.today() - timedelta(days=settings.min_transaction_age_days)
     account_transaction_groups = api.get_transactions(
         start_date=start_date,
         end_date=end_date,
