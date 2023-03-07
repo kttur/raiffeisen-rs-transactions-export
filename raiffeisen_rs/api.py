@@ -15,14 +15,10 @@ class Transaction:
     additional_info: str
     transaction_type: str
     description: str
+    balance: str
 
     def to_dict(self):
         return self.__dict__
-
-
-@dataclass
-class RSDTransaction(Transaction):
-    balance: str
 
     @classmethod
     def from_list(cls, transaction):
@@ -39,60 +35,6 @@ class RSDTransaction(Transaction):
             'description': transaction[13],
         }
         return cls(**kwargs)
-
-
-@dataclass
-class EURTransaction(Transaction):
-    card_number: str
-
-    @classmethod
-    def from_list(cls, transaction):
-        kwargs = {
-            'currency_code': transaction[1],
-            'currency': transaction[2],
-            'datetime': transaction[3],
-            'card_number': transaction[5],
-            'title': transaction[6],
-            'debit': transaction[8],
-            'credit': transaction[9],
-            'additional_info': transaction[11],
-            'transaction_type': transaction[13],
-            'description': transaction[14],
-        }
-        return cls(**kwargs)
-
-
-@dataclass
-class USDTransaction(Transaction):
-    card_number: str
-
-    @classmethod
-    def from_list(cls, transaction):
-        kwargs = {
-            'currency_code': transaction[1],
-            'currency': transaction[2],
-            'datetime': transaction[3],
-            'card_number': transaction[5],
-            'title': transaction[6],
-            'debit': transaction[8],
-            'credit': transaction[9],
-            'additional_info': transaction[11],
-            'transaction_type': transaction[13],
-            'description': transaction[14],
-        }
-        return cls(**kwargs)
-
-
-class TransactionFactory:
-    @classmethod
-    def from_list(cls, transaction):
-        match transaction[2]:
-            case 'RSD':
-                return RSDTransaction.from_list(transaction)
-            case 'EUR':
-                return EURTransaction.from_list(transaction)
-            case 'USD':
-                return USDTransaction.from_list(transaction)
 
 
 class Account:
@@ -157,7 +99,7 @@ class Account:
         response.raise_for_status()
         data = decode_response(response)
         return [
-            TransactionFactory.from_list(transaction)
+            Transaction.from_list(transaction)
             for transaction in data[0][1]
         ] if data and len(data[0]) > 1 else []
 
