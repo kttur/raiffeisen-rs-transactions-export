@@ -37,7 +37,6 @@ def get_parser() -> ArgumentParser:
         '-e', '--email',
         nargs='*',
         action='append',
-        store='email',
         help="Wallet email. Format: 'raiffeisen_account_number:wallet_email'. You can use multiple -e arguments.")
     parser.add_argument('-f', '--file', help="Wallet email file.")
     parser.add_argument('--smtp-host', help="SMTP host.")
@@ -58,14 +57,14 @@ def load_settings() -> Settings:
     save_to_csv = args.csv or bool(environ.get("SAVE_TO_CSV", False))
     csv_file_dir = args.path or environ.get("CSV_FILE_DIR", ".")
     wallet_email_file = args.file or environ.get("WALLET_EMAIL_FILE")
-    wallet_emails = args.emails or environ.get("WALLET_EMAILS", "").split(',')
+    wallet_emails = args.email or environ.get("WALLET_EMAILS").split(',') if environ.get("WALLET_EMAILS") else []
     smtp_host = args.smtp_host or environ.get("SMTP_HOST")
     smtp_port = args.smtp_port or int(environ.get("SMTP_PORT", 587))
     smtp_username = args.smtp_username or environ.get("SMTP_USERNAME")
     smtp_password = args.smtp_password or environ.get("SMTP_PASSWORD")
     smtp_use_tls = (
         bool(args.smtp_use_tls)
-        if args.ssmtp_use_tls is not None
+        if args.smtp_use_tls is not None
         else bool(environ.get("SMTP_USE_TLS", True))
     ),
 
