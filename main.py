@@ -50,11 +50,12 @@ def main():
             data=[x.to_dict() for x in account_group["transactions"]],
         )
 
-        if account["number"] in settings.wallet_emails and smtp:
-            wallet_email = settings.wallet_emails[account["number"]]
+        account_id = f"{account['number']}-{account['currency']}"
+        wallet_email = settings.wallet_emails.get(account_id)
+        if wallet_email and smtp:
             smtp.send(
                 to=wallet_email,
-                subject=f"Raiffeisen RS transactions for {account['number']} from {start_date} to {end_date}",
+                subject=f"Raiffeisen RS transactions for {account_id} from {start_date} to {end_date}",
                 attached_file=file_path,
             )
 
