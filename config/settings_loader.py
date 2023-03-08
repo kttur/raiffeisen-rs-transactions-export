@@ -55,9 +55,21 @@ def load_settings() -> Settings:
 
     username = args.username or environ.get("USERNAME")
     password_hash = args.password or environ.get("PASSWORD_HASH")
-    max_transaction_age_days = args.days or int(environ.get("MAX_TRANSACTION_AGE_DAYS", 1))
-    min_transaction_age_days = args.skip_days or int(environ.get("MIN_TRANSACTION_AGE_DAYS", 0))
-    save_to_csv = args.csv or bool(environ.get("SAVE_TO_CSV", False))
+    max_transaction_age_days = (
+        args.days
+        if args.days is not None
+        else int(environ.get("MAX_TRANSACTION_AGE_DAYS", 1))
+    )
+    min_transaction_age_days = (
+        args.skip_days
+        if args.skip_days is not None
+        else int(environ.get("MIN_TRANSACTION_AGE_DAYS", 0))
+    )
+    save_to_csv = (
+            args.csv
+            if args.csv is not None
+            else bool(environ.get("SAVE_TO_CSV", False))
+    )
     csv_file_dir = args.path or environ.get("CSV_FILE_DIR", ".")
     wallet_email_file = args.file or environ.get("WALLET_EMAIL_FILE")
     wallet_emails = args.email or environ.get("WALLET_EMAILS").split(',') if environ.get("WALLET_EMAILS") else []
@@ -69,7 +81,7 @@ def load_settings() -> Settings:
         bool(args.smtp_use_tls)
         if args.smtp_use_tls is not None
         else bool(environ.get("SMTP_USE_TLS", True))
-    ),
+    )
 
     if not username:
         raise ValueError("Username is required.")
