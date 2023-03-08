@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from os import environ
 
 
@@ -8,20 +8,21 @@ class SMTPSettings:
     host: str
     port: int
     username: str
-    password: str
+    password: str = field(repr=False)
     use_tls: bool
 
 
 @dataclass
 class Settings:
     username: str
-    password_hash: str
+    password_hash: str = field(repr=False)
     max_transaction_age_days: int
     min_transaction_age_days: int
     save_to_csv: bool
     csv_file_dir: str
     wallet_emails: dict[str, str]
     smtp_settings: SMTPSettings | None
+    log_level: str = "INFO"
 
 
 def get_parser() -> ArgumentParser:
@@ -46,12 +47,19 @@ def get_parser() -> ArgumentParser:
     parser.add_argument('--smtp-username', help="SMTP username.")
     parser.add_argument('--smtp-password', help="SMTP password.")
     parser.add_argument('--smtp-use-tls', help="SMTP use TLS.")
+    parser.add_argument('--log-level', help="Log level.")
     return parser
 
 
 def load_settings() -> Settings:
     parser = get_parser()
     args = parser.parse_args()
+
+    log_level = (
+        args.log_level
+        if args.log_level is not None
+        else environ.get("LOG_LEVEL", "INFO")
+    )
 
     username = args.username or environ.get("USERNAME")
     password_hash = args.password or environ.get("PASSWORD_HASH")
