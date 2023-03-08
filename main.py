@@ -11,14 +11,12 @@ logger = get_logger(__name__, settings.log_level)
 
 
 def main():
-    logger.info("Starting Raiffeisen RS API script")
+    logger.info("Starting export from Raiffeisen.rs to CSV")
     logger.debug(f"Settings: {settings}")
     api = RaiffeisenRsAPI(
         username=settings.username,
         password_hash=settings.password_hash,
     )
-    logger.debug(f"Logging in to Raiffeisen RS API as {settings.username}")
-    api.login()
 
     if settings.smtp_settings:
         smtp = SMTP(
@@ -35,6 +33,9 @@ def main():
 
     if settings.save_to_csv:
         logger.info(f"CSV files will be saved to {settings.csv_file_dir}")
+
+    logger.debug(f"Logging in to Raiffeisen.rs API as {settings.username}")
+    api.login()
 
     start_date = date.today() - timedelta(days=settings.max_transaction_age_days)
     end_date = date.today() - timedelta(days=settings.min_transaction_age_days)
