@@ -18,6 +18,8 @@ class Settings:
     password_hash: str = field(repr=False)
     max_transaction_age_days: int
     min_transaction_age_days: int
+    only_new: bool
+    db_file: str | None
     save_to_csv: bool
     csv_file_dir: str
     wallet_emails: dict[str, str]
@@ -34,7 +36,9 @@ def get_parser() -> ArgumentParser:
     parser.add_argument('-p', '--password', help="Raiffeisen RS password hash.")
     parser.add_argument('-d', '--days', help="Max transaction age in days.")
     parser.add_argument('-s', '--skip-days', help="Skip transactions younger than X days.")
-    parser.add_argument('-c', '--csv', help="Save transactions to CSV file.", action="store_true")
+    parser.add_argument('-n', '--new', help="Export only new transactions.")
+    parser.add_argument('-b', '--db', help="Database file.")
+    parser.add_argument('-c', '--csv', help="Save transactions to CSV file.")
     parser.add_argument('--path', help="CSV file directory.")
     parser.add_argument(
         '-e', '--email',
@@ -73,6 +77,12 @@ def load_settings() -> Settings:
         if args.skip_days is not None
         else int(environ.get("MIN_TRANSACTION_AGE_DAYS", 0))
     )
+    only_new = (
+        bool(args.new)
+        if args.new is not None
+        else bool(environ.get("ONLY_NEW", False))
+    )
+    db_file = args.db or environ.get("DB_FILE", "db.sqlite")
     save_to_csv = (
             args.csv
             if args.csv is not None
@@ -139,8 +149,11 @@ def load_settings() -> Settings:
         password_hash=password_hash,
         max_transaction_age_days=max_transaction_age_days,
         min_transaction_age_days=min_transaction_age_days,
+        only_new=only_new,
+        db_file=db_file,
         save_to_csv=save_to_csv,
         csv_file_dir=csv_file_dir,
         wallet_emails=emails,
         smtp_settings=smtp_settings,
+        log_level=log_level,
     )

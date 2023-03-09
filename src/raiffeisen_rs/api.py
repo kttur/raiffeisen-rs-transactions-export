@@ -1,3 +1,4 @@
+import pandas as pd
 import requests
 from dataclasses import dataclass
 
@@ -6,6 +7,7 @@ from src.raiffeisen_rs.utils import decode_response, parse_date
 
 @dataclass
 class Transaction:
+    id: str
     currency_code: str
     currency: str
     datetime: str
@@ -23,6 +25,7 @@ class Transaction:
     @classmethod
     def from_list(cls, transaction):
         kwargs = {
+            'id': transaction[11],
             'currency_code': transaction[1],
             'currency': transaction[2],
             'datetime': transaction[3],
@@ -102,6 +105,23 @@ class Account:
             Transaction.from_list(transaction)
             for transaction in data[0][1]
         ] if data and len(data[0]) > 1 else []
+
+
+@dataclass
+class AccountTransactions:
+    account: Account
+    transactions: list[Transaction]
+
+    def to_dict(self):
+        return {
+            'account': self.account.to_dict(),
+            'transactions': [transaction.to_dict() for transaction in self.transactions],
+        }
+
+    def to_df(self):
+        df = pd.DataFrame([transaction.to_dict() for transaction in self.transactions])
+        df['account'] = self.account.number
+        return df
 
 
 class RaiffeisenRsAPI:
@@ -197,8 +217,7 @@ class RaiffeisenRsAPI:
             end_date=None,
             from_amount=None,
             to_amount=None,
-            group_by_account=True,
-    ) -> list[Transaction | dict[str, dict | list[Transaction]]]:
+    ) -> list[AccountTransactions]:
         """
         Get transactions from all accounts.
         Args:
@@ -208,10 +227,8 @@ class RaiffeisenRsAPI:
                 Supported format is %d.%m.%Y or ISO format.
             from_amount (float): Filter transactions by min amount. Default is None.
             to_amount (float): Filter transactions by max amount. Default is None.
-            group_by_account (bool): Group transactions by account. Default is True.
         Returns:
-            list[Transaction | dict[str, dict | list[Transaction]]]: List of transactions if group_by_account is False
-            or list of dicts with account data and transactions if group_by_account is True.
+            list[AccountTransactions]: List of AccountTransactions.
         """
 
         if not self.accounts:
@@ -219,19 +236,16 @@ class RaiffeisenRsAPI:
 
         transactions = []
         for account in self.accounts:
-            account_transactions = account.get_transactions(
+            account_transactions_raw = account.get_transactions(
                 start_date=start_date,
                 end_date=end_date,
                 from_amount=from_amount,
                 to_amount=to_amount,
             )
-
-            if group_by_account:
-                transactions.append({
-                    'account': account.to_dict(),
-                    'transactions': account_transactions
-                })
-            else:
-                transactions.extend(account_transactions)
+            account_transactions = AccountTransactions(
+                account=account,
+                transactions=account_transactions_raw,
+            )
+            transactions.append(account_transactions)
 
         return transactions
