@@ -42,7 +42,6 @@ def get_parser() -> ArgumentParser:
     parser.add_argument('--path', help="CSV file directory.")
     parser.add_argument(
         '-e', '--email',
-        nargs='*',
         action='append',
         help="Wallet email. Format: 'raiffeisen_account_number:wallet_email'. You can use multiple -e arguments.")
     parser.add_argument('-f', '--file', help="Wallet email file.")
@@ -115,8 +114,8 @@ def load_settings() -> Settings:
                 emails[line.split(':')[0]] = line.split(':')[1]
 
     for wallet_email in wallet_emails:
-        account_number, wallet_email = wallet_email.split(':')
-        emails[account_number] = wallet_email
+        account_number, email = wallet_email.split(':')
+        emails[account_number] = email
 
     if emails:
         if not smtp_host:
