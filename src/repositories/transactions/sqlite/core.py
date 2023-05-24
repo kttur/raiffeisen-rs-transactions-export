@@ -45,7 +45,9 @@ class SQLite(BaseTransactionRepository):
         if account_id:
             where.append(f"account = '{account_id}'")
         if transaction_ids:
-            where.append(f"id IN {tuple(transaction_ids)}")
+            where.append(f"id IN {tuple(transaction_ids)}") \
+                if len(transaction_ids) > 1 \
+                else where.append(f"id = '{transaction_ids[0]}'")
         if currency:
             where.append(f"currency = '{currency}'")
         if start_date:
